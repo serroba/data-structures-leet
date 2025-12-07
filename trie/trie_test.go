@@ -116,11 +116,13 @@ func TestTrie_Delete(t1 *testing.T) {
 		name   string
 		fields fields
 		args   args
-		want   int
+		want   *Trie
 	}{
-		{name: "delete empty", args: args{word: "not in dict"}, want: 0},
-		{name: "delete not in dict", args: args{word: "not in dict", dict: []string{"some", "words"}}, want: 2},
-		{name: "delete infix", args: args{word: "cat", dict: []string{"car", "cat", "caterpillar"}}, want: 2},
+		{name: "delete empty", args: args{word: "not in dict"}, want: NewTrie()},
+		{name: "delete not in dict", args: args{word: "not in dict", dict: []string{"some", "words"}}, want: NewTrie().Insert("some").Insert("words")},
+		{name: "delete cat", args: args{word: "cat", dict: []string{"car", "cat", "caterpillar"}}, want: NewTrie().Insert("car").Insert("caterpillar")},
+		{name: "delete cat", args: args{word: "cars", dict: []string{"cars", "carpool", "caterpillar"}}, want: NewTrie().Insert("carpool").Insert("caterpillar")},
+		{name: "delete caterpillar", args: args{word: "caterpillar", dict: []string{"car", "cat", "caterpillar"}}, want: NewTrie().Insert("car").Insert("cat")},
 	}
 	for _, tt := range tests {
 		t1.Run(tt.name, func(t1 *testing.T) {
@@ -129,8 +131,8 @@ func TestTrie_Delete(t1 *testing.T) {
 				t.Insert(word)
 			}
 			t.Delete(tt.args.word)
-			if got := t.CountWordsWith(""); got != tt.want {
-				t1.Errorf("CountWordsWith() = %v, want %v", got, tt.want)
+			if got := t; !got.Equal(tt.want) {
+				t1.Errorf("Trie = %v, want %v", got.String(), tt.want.String())
 			}
 		})
 	}
