@@ -67,9 +67,6 @@ func (t *Trie) SearchWord(word string) bool {
 }
 
 func (t *Trie) CountWordsWith(prefix string) int {
-	if prefix == "" {
-		return 1
-	}
 	current := t.Root
 	for _, ch := range prefix {
 		if _, ok := current.children[ch]; !ok {
@@ -79,4 +76,20 @@ func (t *Trie) CountWordsWith(prefix string) int {
 	}
 
 	return current.countWords()
+}
+
+func (t *Trie) Delete(word string) {
+	if !t.SearchWord(word) {
+		return
+	}
+	current := t.Root
+
+	for _, ch := range word {
+		if _, ok := current.children[ch]; ok {
+			current = current.children[ch]
+			if current.isEnd && current.children != nil {
+				current.isEnd = false
+			}
+		}
+	}
 }

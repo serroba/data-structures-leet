@@ -81,7 +81,7 @@ func TestTrie_CountWordsWith(t1 *testing.T) {
 		args   args
 		want   int
 	}{
-		{name: "return 1 with no prefix", args: args{prefix: ""}, want: 1},
+		{name: "return 1 with no prefix", args: args{prefix: ""}, want: 0},
 		{name: "return 1 with prefix on a single word dictionary", args: args{prefix: "a", dict: []string{"abc"}}, want: 1},
 		{name: "adams's example Dog", args: args{prefix: "Dog", dict: []string{"Dog", "Cat", "Bear", "Mouse", "Car", "Bean"}}, want: 1},
 		{name: "adams's example Ca", args: args{prefix: "Ca", dict: []string{"Dog", "Cat", "Bear", "Mouse", "Car", "Bean"}}, want: 2},
@@ -89,6 +89,7 @@ func TestTrie_CountWordsWith(t1 *testing.T) {
 		{name: "adams's example Bea", args: args{prefix: "Bea", dict: []string{"Dog", "Cat", "Bear", "Mouse", "Car", "Bean"}}, want: 2},
 		{name: "adams's example Bear", args: args{prefix: "Bear", dict: []string{"Dog", "Cat", "Bear", "Mouse", "Car", "Bean"}}, want: 1},
 		{name: "word and prefix", args: args{prefix: "Dog", dict: []string{"Dog", "Dogs", "Cat", "Bear", "Mouse", "Car", "Bean"}}, want: 2},
+		{name: "count all words", args: args{prefix: "", dict: []string{"Dog", "Dogs", "Cat", "Bear", "Mouse", "Car", "Bean"}}, want: 7},
 	}
 	for _, tt := range tests {
 		t1.Run(tt.name, func(t1 *testing.T) {
@@ -97,6 +98,38 @@ func TestTrie_CountWordsWith(t1 *testing.T) {
 				t.Insert(word)
 			}
 			if got := t.CountWordsWith(tt.args.prefix); got != tt.want {
+				t1.Errorf("CountWordsWith() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestTrie_Delete(t1 *testing.T) {
+	type fields struct {
+		Root *node
+	}
+	type args struct {
+		word string
+		dict []string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   int
+	}{
+		{name: "delete empty", args: args{word: "not in dict"}, want: 0},
+		{name: "delete not in dict", args: args{word: "not in dict", dict: []string{"some", "words"}}, want: 2},
+		{name: "delete infix", args: args{word: "cat", dict: []string{"car", "cat", "caterpillar"}}, want: 2},
+	}
+	for _, tt := range tests {
+		t1.Run(tt.name, func(t1 *testing.T) {
+			t := NewTrie()
+			for _, word := range tt.args.dict {
+				t.Insert(word)
+			}
+			t.Delete(tt.args.word)
+			if got := t.CountWordsWith(""); got != tt.want {
 				t1.Errorf("CountWordsWith() = %v, want %v", got, tt.want)
 			}
 		})
