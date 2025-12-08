@@ -246,3 +246,29 @@ func TestIsValidParens(t *testing.T) {
 		})
 	}
 }
+
+func TestRemoveDuplicates(t *testing.T) {
+	type args struct {
+		nums []int
+	}
+	tests := []struct {
+		name string
+		args args
+		want []int
+	}{
+		{name: "example 1", args: args{nums: []int{1, 1, 2}}, want: []int{1, 2}},
+		{name: "example 2", args: args{nums: []int{0, 0, 1, 1, 1, 2, 2, 3, 3, 4}}, want: []int{0, 1, 2, 3, 4}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := training.RemoveDuplicates(tt.args.nums); got != len(tt.want) {
+				t.Errorf("RemoveDuplicates() = %v, want %v", got, len(tt.want))
+			}
+			for i := range tt.want {
+				if i < len(tt.want) && tt.args.nums[i] != tt.want[i] {
+					t.Errorf("Not identical element = %v, want %v", tt.args.nums[i], tt.want[i])
+				}
+			}
+		})
+	}
+}

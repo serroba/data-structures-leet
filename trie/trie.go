@@ -52,6 +52,12 @@ func (t *Trie) Insert(word string) *Trie {
 	return t
 }
 
+func (t *Trie) InsertMany(words []string) {
+	for _, word := range words {
+		t.Insert(word)
+	}
+}
+
 func (t *Trie) SearchPrefix(prefix string) bool {
 	current := t.Root
 	for _, ch := range prefix {
@@ -77,6 +83,10 @@ func (t *Trie) SearchWord(word string) bool {
 	return current.isEnd
 }
 
+func (t *Trie) SearchWith(pattern string) []string {
+	return []string{}
+}
+
 func (t *Trie) CountWordsWith(prefix string) int {
 	current := t.Root
 	for _, ch := range prefix {
@@ -90,9 +100,9 @@ func (t *Trie) CountWordsWith(prefix string) int {
 }
 
 func (t *Trie) Delete(word string) {
-	if !t.SearchWord(word) {
-		return
-	}
+	//if !t.SearchWord(word) {
+	//	return
+	//}
 
 	current := t.Root
 	safeNode := t.Root

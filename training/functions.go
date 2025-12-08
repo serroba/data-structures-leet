@@ -225,3 +225,18 @@ func isLeftParen(r rune) bool {
 func matchType(left, right rune) bool {
 	return left == '(' && right == ')' || left == '[' && right == ']' || left == '{' && right == '}'
 }
+
+func RemoveDuplicates(nums []int) int {
+	if len(nums) == 0 {
+		return 0
+	}
+
+	j := 1
+	for i := 1; i < len(nums); i++ {
+		if nums[i] != nums[j-1] {
+			nums[j] = nums[i]
+			j++
+		}
+	}
+	return j
+}

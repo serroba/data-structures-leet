@@ -1,6 +1,9 @@
 package trie
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestTrie_SearchPrefix(t1 *testing.T) {
 	type fields struct {
@@ -26,9 +29,7 @@ func TestTrie_SearchPrefix(t1 *testing.T) {
 	for _, tt := range tests {
 		t1.Run(tt.name, func(t1 *testing.T) {
 			t := NewTrie()
-			for _, word := range tt.args.dict {
-				t.Insert(word)
-			}
+			t.InsertMany(tt.args.dict)
 			if got := t.SearchPrefix(tt.args.prefix); got != tt.want {
 				t1.Errorf("SearchPrefix() = %v, want %v", got, tt.want)
 			}
@@ -57,9 +58,7 @@ func TestTrie_SearchWord(t1 *testing.T) {
 	for _, tt := range tests {
 		t1.Run(tt.name, func(t1 *testing.T) {
 			t := NewTrie()
-			for _, word := range tt.args.dict {
-				t.Insert(word)
-			}
+			t.InsertMany(tt.args.dict)
 			if got := t.SearchWord(tt.args.word); got != tt.want {
 				t1.Errorf("SearchWord() = %v, want %v", got, tt.want)
 			}
@@ -94,9 +93,7 @@ func TestTrie_CountWordsWith(t1 *testing.T) {
 	for _, tt := range tests {
 		t1.Run(tt.name, func(t1 *testing.T) {
 			t := NewTrie()
-			for _, word := range tt.args.dict {
-				t.Insert(word)
-			}
+			t.InsertMany(tt.args.dict)
 			if got := t.CountWordsWith(tt.args.prefix); got != tt.want {
 				t1.Errorf("CountWordsWith() = %v, want %v", got, tt.want)
 			}
@@ -127,12 +124,37 @@ func TestTrie_Delete(t1 *testing.T) {
 	for _, tt := range tests {
 		t1.Run(tt.name, func(t1 *testing.T) {
 			t := NewTrie()
-			for _, word := range tt.args.dict {
-				t.Insert(word)
-			}
+			t.InsertMany(tt.args.dict)
 			t.Delete(tt.args.word)
 			if got := t; !got.Equal(tt.want) {
 				t1.Errorf("Trie = %v, want %v", got.String(), tt.want.String())
+			}
+		})
+	}
+}
+
+func TestTrie_SearchWith(t1 *testing.T) {
+	type fields struct {
+		Root *node
+	}
+	type args struct {
+		wildcard string
+		dict     []string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   []string
+	}{
+		{name: "Search with c?", args: args{wildcard: "c?", dict: []string{"cars", "carpool", "caterpillar"}}, want: []string{"cars", "carpool", "caterpillar"}},
+	}
+	for _, tt := range tests {
+		t1.Run(tt.name, func(t1 *testing.T) {
+			t := NewTrie()
+			t.InsertMany(tt.args.dict)
+			if got := t.SearchWith(tt.args.wildcard); !reflect.DeepEqual(got, tt.want) {
+				t1.Errorf("SearchWith() = %v, want %v", got, tt.want)
 			}
 		})
 	}
