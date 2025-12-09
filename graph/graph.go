@@ -1,5 +1,7 @@
 package graph
 
+import "ds/queue"
+
 type Edge struct {
 	u, v int
 }
@@ -23,10 +25,10 @@ func (g UndirectedGraph) IsThereAPathBetween(source, destination int) bool {
 	}
 	visited := make([]bool, len(g.graph))
 	visited[source] = true
-	queue := []int{source}
-	for len(queue) > 0 {
-		u := queue[0]
-		queue = queue[1:]
+	q := []int{source}
+	for len(q) > 0 {
+		u := q[0]
+		q = q[1:]
 
 		if u == destination {
 			return true
@@ -35,7 +37,7 @@ func (g UndirectedGraph) IsThereAPathBetween(source, destination int) bool {
 		for _, v := range g.graph[u] {
 			if !visited[v] {
 				visited[v] = true
-				queue = append(queue, v)
+				q = append(q, v)
 			}
 		}
 	}
@@ -43,25 +45,22 @@ func (g UndirectedGraph) IsThereAPathBetween(source, destination int) bool {
 }
 
 func (g UndirectedGraph) IsFullyConnected() bool {
-	if len(g.graph) == 1 {
-		return true
-	}
 	visited := make([]bool, len(g.graph))
 	visited[0] = true
-	queue := []int{0}
-	for len(queue) > 0 {
-		u := queue[0]
-		queue = queue[1:]
+	q := queue.NewQueue[int]()
+	q.Enqueue(0)
+	for q.Len() > 0 {
+		u := q.Dequeue()
 
 		for _, v := range g.graph[u] {
 			if !visited[v] {
 				visited[v] = true
-				queue = append(queue, v)
+				q.Enqueue(v)
 			}
 		}
 	}
-	for i := range g.graph {
-		if visited[i] == false {
+	for _, v := range visited {
+		if v == false {
 			return false
 		}
 	}
@@ -99,4 +98,41 @@ func (g UndirectedGraph) IsBipartite() bool {
 		}
 	}
 	return true
+}
+
+func (g UndirectedGraph) IsATree() bool {
+	if len(g.graph) == 1 {
+		return true
+	}
+	return g.IsFullyConnected() && !g.HasCycles()
+}
+
+func (g UndirectedGraph) HasCycles() bool {
+	visited := make([]bool, len(g.graph))
+	parent := make([]int, len(g.graph))
+	for i := range parent {
+		parent[i] = -1
+	}
+	for i := 0; i < len(g.graph); i++ {
+		if !visited[i] {
+			q := queue.NewQueue[int]()
+			q.Enqueue(i)
+			visited[i] = true
+
+			for !q.Empty() {
+				u := q.Dequeue()
+
+				for _, v := range g.graph[u] {
+					if !visited[v] {
+						visited[v] = true
+						parent[v] = u
+						q.Enqueue(v)
+					} else if v != parent[u] {
+						return true
+					}
+				}
+			}
+		}
+	}
+	return false
 }
