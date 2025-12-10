@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+
+	"ds/queue"
 )
 
 type node struct {
@@ -13,6 +15,17 @@ type node struct {
 
 func (n *node) hasChildren() bool {
 	return len(n.children) > 0
+}
+
+func (n *node) sortedChildrenKeys() []rune {
+	keys := make([]rune, 0, len(n.children))
+	for k := range n.children {
+		keys = append(keys, k)
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		return keys[i] < keys[j]
+	})
+	return keys
 }
 
 func (n *node) countWords() int {
@@ -85,6 +98,69 @@ func (t *Trie) SearchWord(word string) bool {
 
 func (t *Trie) SearchWith(pattern string) []string {
 	return []string{}
+}
+
+func (t *Trie) FindFirstWith(target rune) string {
+	if t.Root == nil {
+		return ""
+	}
+	type queueItem struct {
+		node  *node
+		depth int
+		word  string
+	}
+	q := queue.NewQueue[queueItem]()
+	q.Enqueue(queueItem{node: t.Root, depth: 0, word: ""})
+
+	for !q.Empty() {
+		item := q.Dequeue()
+		for _, ch := range item.node.sortedChildrenKeys() {
+			child := item.node.children[ch]
+			nextWord := item.word + string(ch)
+			if ch == target {
+				return findEarliestFullWord(child, nextWord)
+			}
+			q.Enqueue(queueItem{node: child, depth: item.depth + 1, word: nextWord})
+		}
+	}
+	return ""
+}
+
+func (t *Trie) FindAllWords() []string {
+	var words []string
+	type item struct {
+		node *node
+		word string
+	}
+	q := queue.NewQueue[item]()
+	q.Enqueue(item{node: t.Root, word: ""})
+	for !q.Empty() {
+		i := q.Dequeue()
+		for ch, n := range i.node.children {
+			nextWord := i.word + string(ch)
+			if n.isEnd {
+				words = append(words, nextWord)
+			}
+			q.Enqueue(item{node: n, word: nextWord})
+		}
+
+	}
+	return words
+}
+
+func findEarliestFullWord(node *node, prefix string) string {
+	if !node.hasChildren() {
+		return prefix
+	}
+
+	for _, ch := range node.sortedChildrenKeys() {
+		child := node.children[ch]
+		result := findEarliestFullWord(child, prefix+string(ch))
+		if result != "" {
+			return result
+		}
+	}
+	return ""
 }
 
 func (t *Trie) CountWordsWith(prefix string) int {
@@ -184,4 +260,56 @@ func renderNode(n *node, depth int, ch rune) string {
 		result += renderNode(n.children[k], depth+1, k)
 	}
 	return result
+}
+
+func (t *Trie) FindAllLevels() [][]string {
+	if t.Root == nil {
+		return nil
+	}
+	current := t.Root
+	q := queue.NewQueue[*node]()
+	q.Enqueue(current)
+	levels := [][]string{{""}}
+	for !q.Empty() {
+		var chars []string
+		l := q.Len()
+		for i := 0; i < l; i++ {
+			n := q.Dequeue()
+			for ch, val := range n.children {
+				chars = append(chars, string(ch))
+				q.Enqueue(val)
+			}
+		}
+		if chars != nil {
+			levels = append(levels, chars)
+		}
+	}
+	return levels
+}
+
+func (t *Trie) FindLongestWord() string {
+	if t.Root == nil {
+		return ""
+	}
+	var longestWord string
+	current := t.Root
+	type item struct {
+		node *node
+		word string
+	}
+	q := queue.NewQueue[item]()
+	q.Enqueue(item{node: current, word: ""})
+	for !q.Empty() {
+		n := q.Dequeue()
+		for ch, val := range n.node.children {
+			nextWord := n.word + string(ch)
+			if val.isEnd {
+				if len(nextWord) > len(longestWord) {
+					longestWord = nextWord
+				}
+			}
+			q.Enqueue(item{node: val, word: nextWord})
+		}
+	}
+	return longestWord
 }
