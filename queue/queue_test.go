@@ -13,7 +13,7 @@ func TestQueue_Enqueue(t *testing.T) {
 		{name: "Add multiple ints", items: []int{1, 2, 3, 4, 5}},
 	}
 	for _, tt := range intTests {
-		q := NewQueue[int]()
+		q := New[int]()
 		t.Run(tt.name, func(t *testing.T) {
 			for _, item := range tt.items {
 				q.Enqueue(item)
@@ -32,7 +32,7 @@ func TestQueue_Enqueue(t *testing.T) {
 		{name: "Add multiple strings", items: []string{"hello", "world", "foo"}},
 	}
 	for _, tt := range stringTests {
-		q := NewQueue[string]()
+		q := New[string]()
 		t.Run(tt.name, func(t *testing.T) {
 			for _, item := range tt.items {
 				q.Enqueue(item)
@@ -60,7 +60,7 @@ func TestQueue_Len(t *testing.T) {
 		{name: "Multiple elements", items: []int{1, 2, 3, 4, 5}, want: 5},
 	}
 	for _, tt := range tests {
-		q := NewQueue[int]()
+		q := New[int]()
 		t.Run(tt.name, func(t *testing.T) {
 			for _, item := range tt.items {
 				q.Enqueue(item)
@@ -72,7 +72,7 @@ func TestQueue_Len(t *testing.T) {
 	}
 
 	t.Run("Len decreases after Dequeue", func(t *testing.T) {
-		q := NewQueue[int]()
+		q := New[int]()
 		q.Enqueue(1)
 		q.Enqueue(2)
 		q.Enqueue(3)

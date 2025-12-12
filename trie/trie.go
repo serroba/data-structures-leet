@@ -96,7 +96,7 @@ func (t *Trie) SearchWord(word string) bool {
 	return current.isEnd
 }
 
-func (t *Trie) SearchWith(pattern string) []string {
+func (t *Trie) SearchFirstWith(pattern string) []string {
 	return []string{}
 }
 
@@ -105,22 +105,21 @@ func (t *Trie) FindFirstWith(target rune) string {
 		return ""
 	}
 	type queueItem struct {
-		node  *node
-		depth int
-		word  string
+		node           *node
+		incompleteWord string
 	}
-	q := queue.NewQueue[queueItem]()
-	q.Enqueue(queueItem{node: t.Root, depth: 0, word: ""})
+	q := queue.New[queueItem]()
+	q.Enqueue(queueItem{node: t.Root, incompleteWord: ""})
 
 	for !q.Empty() {
 		item := q.Dequeue()
 		for _, ch := range item.node.sortedChildrenKeys() {
 			child := item.node.children[ch]
-			nextWord := item.word + string(ch)
+			nextWord := item.incompleteWord + string(ch)
 			if ch == target {
 				return findEarliestFullWord(child, nextWord)
 			}
-			q.Enqueue(queueItem{node: child, depth: item.depth + 1, word: nextWord})
+			q.Enqueue(queueItem{node: child, incompleteWord: nextWord})
 		}
 	}
 	return ""
@@ -132,7 +131,7 @@ func (t *Trie) FindAllWords() []string {
 		node *node
 		word string
 	}
-	q := queue.NewQueue[item]()
+	q := queue.New[item]()
 	q.Enqueue(item{node: t.Root, word: ""})
 	for !q.Empty() {
 		i := q.Dequeue()
@@ -149,7 +148,7 @@ func (t *Trie) FindAllWords() []string {
 }
 
 func findEarliestFullWord(node *node, prefix string) string {
-	if !node.hasChildren() {
+	if node.isEnd {
 		return prefix
 	}
 
@@ -176,7 +175,7 @@ func (t *Trie) CountWordsWith(prefix string) int {
 }
 
 func (t *Trie) Delete(word string) {
-	//if !t.SearchWord(word) {
+	//if !t.SearchWord(incompleteWord) {
 	//	return
 	//}
 
@@ -267,7 +266,7 @@ func (t *Trie) FindAllLevels() [][]string {
 		return nil
 	}
 	current := t.Root
-	q := queue.NewQueue[*node]()
+	q := queue.New[*node]()
 	q.Enqueue(current)
 	levels := [][]string{{""}}
 	for !q.Empty() {
@@ -297,7 +296,7 @@ func (t *Trie) FindLongestWord() string {
 		node *node
 		word string
 	}
-	q := queue.NewQueue[item]()
+	q := queue.New[item]()
 	q.Enqueue(item{node: current, word: ""})
 	for !q.Empty() {
 		n := q.Dequeue()

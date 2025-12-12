@@ -47,7 +47,7 @@ func (g UndirectedGraph) IsThereAPathBetween(source, destination int) bool {
 func (g UndirectedGraph) IsFullyConnected() bool {
 	visited := make([]bool, len(g.graph))
 	visited[0] = true
-	q := queue.NewQueue[int]()
+	q := queue.New[int]()
 	q.Enqueue(0)
 	for q.Len() > 0 {
 		u := q.Dequeue()
@@ -115,7 +115,7 @@ func (g UndirectedGraph) HasCycles() bool {
 	}
 	for i := 0; i < len(g.graph); i++ {
 		if !visited[i] {
-			q := queue.NewQueue[int]()
+			q := queue.New[int]()
 			q.Enqueue(i)
 			visited[i] = true
 

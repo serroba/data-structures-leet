@@ -23,8 +23,8 @@ func TestTrie_SearchPrefix(t1 *testing.T) {
 		{name: "test empty string on empty trie", args: args{prefix: ""}, want: true},
 		{name: "test empty string on non-empty trie", args: args{prefix: "", dict: []string{"a", "b"}}, want: true},
 		{name: "test single char", args: args{prefix: "a", dict: []string{"a"}}, want: true},
-		{name: "test char in word", args: args{prefix: "a", dict: []string{"abc"}}, want: true},
-		{name: "test chars in word", args: args{prefix: "ab", dict: []string{"abc"}}, want: true},
+		{name: "test char in incompleteWord", args: args{prefix: "a", dict: []string{"abc"}}, want: true},
+		{name: "test chars in incompleteWord", args: args{prefix: "ab", dict: []string{"abc"}}, want: true},
 		{name: "test chars in many words", args: args{prefix: "ab", dict: []string{"abc", "abd", "ab", "car"}}, want: true},
 	}
 	for _, tt := range tests {
@@ -82,13 +82,13 @@ func TestTrie_CountWordsWith(t1 *testing.T) {
 		want   int
 	}{
 		{name: "return 1 with no prefix", args: args{prefix: ""}, want: 0},
-		{name: "return 1 with prefix on a single word dictionary", args: args{prefix: "a", dict: []string{"abc"}}, want: 1},
+		{name: "return 1 with prefix on a single incompleteWord dictionary", args: args{prefix: "a", dict: []string{"abc"}}, want: 1},
 		{name: "adams's example Dog", args: args{prefix: "Dog", dict: []string{"Dog", "Cat", "Bear", "Mouse", "Car", "Bean"}}, want: 1},
 		{name: "adams's example Ca", args: args{prefix: "Ca", dict: []string{"Dog", "Cat", "Bear", "Mouse", "Car", "Bean"}}, want: 2},
 		{name: "adams's example Zeg", args: args{prefix: "Zeg", dict: []string{"Dog", "Cat", "Bear", "Mouse", "Car", "Bean"}}, want: 0},
 		{name: "adams's example Bea", args: args{prefix: "Bea", dict: []string{"Dog", "Cat", "Bear", "Mouse", "Car", "Bean"}}, want: 2},
 		{name: "adams's example Bear", args: args{prefix: "Bear", dict: []string{"Dog", "Cat", "Bear", "Mouse", "Car", "Bean"}}, want: 1},
-		{name: "word and prefix", args: args{prefix: "Dog", dict: []string{"Dog", "Dogs", "Cat", "Bear", "Mouse", "Car", "Bean"}}, want: 2},
+		{name: "incompleteWord and prefix", args: args{prefix: "Dog", dict: []string{"Dog", "Dogs", "Cat", "Bear", "Mouse", "Car", "Bean"}}, want: 2},
 		{name: "count all words", args: args{prefix: "", dict: []string{"Dog", "Dogs", "Cat", "Bear", "Mouse", "Car", "Bean"}}, want: 7},
 	}
 	for _, tt := range tests {
@@ -181,7 +181,7 @@ func TestTrie_FindFirstWith(t1 *testing.T) {
 			want:   "",
 		},
 		{
-			name:   "single word with matching char",
+			name:   "single incompleteWord with matching char",
 			fields: fields{Root: NewTrie().Insert("bear").Root},
 			args:   args{char: 'e'},
 			want:   "bear",
@@ -210,7 +210,7 @@ func TestTrie_FindFirstWith(t1 *testing.T) {
 			want: "egg", // both egg and elk have 'e' at index 0, egg comes first
 		},
 		{
-			name: "character not found in any word",
+			name: "character not found in any incompleteWord",
 			fields: fields{Root: func() *node {
 				t := NewTrie()
 				t.InsertMany([]string{"cat", "dog", "bird"})
@@ -244,7 +244,7 @@ func TestTrie_FindAllWords(t1 *testing.T) {
 			want:  nil,
 		},
 		{
-			name:  "Single word",
+			name:  "Single incompleteWord",
 			words: []string{"hello"},
 			want:  []string{"hello"},
 		},
@@ -293,7 +293,7 @@ func TestTrie_FindAllLevels(t1 *testing.T) {
 			want:   [][]string{{""}},
 		},
 		{
-			name:   "single word",
+			name:   "single incompleteWord",
 			fields: fields{Words: []string{"a"}},
 			want: [][]string{
 				{""},
@@ -377,7 +377,7 @@ func TestTrie_FindLongestWord(t1 *testing.T) {
 			want:  "",
 		},
 		{
-			name:  "single word",
+			name:  "single incompleteWord",
 			words: []string{"hello"},
 			want:  "hello",
 		},
@@ -387,7 +387,7 @@ func TestTrie_FindLongestWord(t1 *testing.T) {
 			want:  "abcd",
 		},
 		{
-			name:  "longest word not last inserted",
+			name:  "longest incompleteWord not last inserted",
 			words: []string{"application", "app", "apple"},
 			want:  "application",
 		},
