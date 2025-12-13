@@ -1,12 +1,13 @@
 package training
 
 import (
+	"slices"
 	"strconv"
 	"strings"
 )
 
 func PrintNumbers(list []int, maxNumber int) string {
-	list = quickSort(list)
+	slices.Sort(list)
 
 	var output []string
 
@@ -41,8 +42,4 @@ func PrintNumbers(list []int, maxNumber int) string {
 	}
 
 	return strings.Join(output, ", ")
-}
-
-func quickSort(list []int) []int {
-	return list
 }
