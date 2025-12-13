@@ -154,7 +154,7 @@ func TestTrie_SearchWith(t1 *testing.T) {
 		t1.Run(tt.name, func(t1 *testing.T) {
 			t := NewTrie()
 			t.InsertMany(tt.args.dict)
-			if got := t.SearchWith(tt.args.wildcard); !reflect.DeepEqual(got, tt.want) {
+			if got := t.SearchFirstWith(tt.args.wildcard); !reflect.DeepEqual(got, tt.want) {
 				t1.Errorf("SearchWith() = %v, want %v", got, tt.want)
 			}
 		})
@@ -424,5 +424,72 @@ func TestTrie_FindLongestWord_SameLength(t1 *testing.T) {
 	}
 	if !found {
 		t1.Errorf("FindLongestWord() = %v, want one of %v", got, valid)
+	}
+}
+
+func TestTrie_HasWordOf(t1 *testing.T) {
+	tests := []struct {
+		name   string
+		words  []string
+		length int
+		want   bool
+	}{
+		{
+			name:   "empty trie returns false",
+			words:  []string{},
+			length: 1,
+			want:   false,
+		},
+		{
+			name:   "single char word exists",
+			words:  []string{"a"},
+			length: 1,
+			want:   true,
+		},
+		{
+			name:   "length 0 on empty trie",
+			words:  []string{},
+			length: 0,
+			want:   false,
+		},
+		{
+			name:   "exact length match",
+			words:  []string{"cat", "dog", "bird"},
+			length: 3,
+			want:   true,
+		},
+		{
+			name:   "no word of requested length",
+			words:  []string{"cat", "dog", "bird"},
+			length: 5,
+			want:   false,
+		},
+		{
+			name:   "longer word exists but not exact length",
+			words:  []string{"application"},
+			length: 5,
+			want:   false,
+		},
+		{
+			name:   "multiple words different lengths",
+			words:  []string{"a", "ab", "abc", "abcd"},
+			length: 3,
+			want:   true,
+		},
+		{
+			name:   "check for longest word length",
+			words:  []string{"foo", "barbecue", "baz"},
+			length: 8,
+			want:   true,
+		},
+	}
+	for _, tt := range tests {
+		t1.Run(tt.name, func(t1 *testing.T) {
+			trie := NewTrie()
+			trie.InsertMany(tt.words)
+			if got := trie.HasWordOf(tt.length); got != tt.want {
+				t1.Errorf("HasWordOf(%d) = %v, want %v", tt.length, got, tt.want)
+			}
+		})
 	}
 }

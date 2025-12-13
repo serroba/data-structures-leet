@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"ds/queue"
+	"ds/stack"
 )
 
 type node struct {
@@ -117,9 +118,32 @@ func (t *Trie) FindFirstWith(target rune) string {
 			child := item.node.children[ch]
 			nextWord := item.incompleteWord + string(ch)
 			if ch == target {
-				return findEarliestFullWord(child, nextWord)
+				return nextWord + (&Trie{Root: child}).FindFirstSortedFullWord()
 			}
 			q.Enqueue(queueItem{node: child, incompleteWord: nextWord})
+		}
+	}
+	return ""
+}
+
+func (t *Trie) FindFirstSortedFullWord() string {
+	if t.Root == nil {
+		return ""
+	}
+	type item struct {
+		node  *node
+		depth int
+		word  string
+	}
+	s := stack.New(item{t.Root, 0, ""})
+	for !s.Empty() {
+		i, _ := s.Pop()
+		if i.node.isEnd {
+			return i.word
+		}
+		keys := i.node.sortedChildrenKeys()
+		for j := len(keys) - 1; j >= 0; j-- {
+			s.Push(item{i.node.children[keys[j]], i.depth + 1, i.word + string(keys[j])})
 		}
 	}
 	return ""
@@ -296,8 +320,7 @@ func (t *Trie) FindLongestWord() string {
 		node *node
 		word string
 	}
-	q := queue.New[item]()
-	q.Enqueue(item{node: current, word: ""})
+	q := queue.New(item{node: current, word: ""})
 	for !q.Empty() {
 		n := q.Dequeue()
 		for ch, val := range n.node.children {
@@ -311,4 +334,28 @@ func (t *Trie) FindLongestWord() string {
 		}
 	}
 	return longestWord
+}
+
+func (t *Trie) HasWordOf(length int) bool {
+	if t.Root == nil {
+		return false
+	}
+	type item struct {
+		node  *node
+		depth int
+	}
+	s := stack.New(item{node: t.Root, depth: 0})
+	for !s.Empty() {
+		i, _ := s.Pop()
+		if length == i.depth {
+			if i.node.isEnd {
+				return true
+			}
+			continue
+		}
+		for _, child := range i.node.children {
+			s.Push(item{child, i.depth + 1})
+		}
+	}
+	return false
 }
