@@ -2,6 +2,7 @@ package trie
 
 import (
 	"fmt"
+	"slices"
 	"sort"
 	"strings"
 
@@ -23,9 +24,7 @@ func (n *node) sortedChildrenKeys() []rune {
 	for k := range n.children {
 		keys = append(keys, k)
 	}
-	sort.Slice(keys, func(i, j int) bool {
-		return keys[i] < keys[j]
-	})
+	slices.Sort(keys)
 	return keys
 }
 
