@@ -148,13 +148,13 @@ func TestTrie_SearchWith(t1 *testing.T) {
 		args   args
 		want   []string
 	}{
-		{name: "Search with c?", args: args{wildcard: "c?", dict: []string{"cars", "carpool", "caterpillar"}}, want: []string{"cars", "carpool", "caterpillar"}},
+		{name: "Search with c?", args: args{wildcard: "c?rs", dict: []string{"cars", "carpool", "caterpillar"}}, want: []string{"cars"}},
 	}
 	for _, tt := range tests {
 		t1.Run(tt.name, func(t1 *testing.T) {
 			t := NewTrie()
 			t.InsertMany(tt.args.dict)
-			if got := t.SearchFirstWith(tt.args.wildcard); !reflect.DeepEqual(got, tt.want) {
+			if got := t.SearchWith(tt.args.wildcard); !reflect.DeepEqual(got, tt.want) {
 				t1.Errorf("SearchWith() = %v, want %v", got, tt.want)
 			}
 		})
@@ -489,6 +489,64 @@ func TestTrie_HasWordOf(t1 *testing.T) {
 			trie.InsertMany(tt.words)
 			if got := trie.HasWordOf(tt.length); got != tt.want {
 				t1.Errorf("HasWordOf(%d) = %v, want %v", tt.length, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestTrie_FindLongestOneCharAtATime(t1 *testing.T) {
+	tests := []struct {
+		name  string
+		words []string
+		want  string
+	}{
+		{
+			name:  "empty trie",
+			words: []string{},
+			want:  "",
+		},
+		{
+			name:  "single character word",
+			words: []string{"a"},
+			want:  "a",
+		},
+		{
+			name:  "apple example",
+			words: []string{"a", "ap", "app", "appl", "apple", "banana", "ban"},
+			want:  "apple",
+		},
+		{
+			name:  "chain broken in middle",
+			words: []string{"a", "ap", "apple"}, // missing "app" and "appl"
+			want:  "ap",
+		},
+		{
+			name:  "multiple valid chains pick longest",
+			words: []string{"a", "ab", "abc", "b", "bc", "bcd", "bcde"},
+			want:  "bcde",
+		},
+		{
+			name:  "tie breaker lexicographically smallest",
+			words: []string{"a", "ab", "abc", "b", "bc", "bcd"},
+			want:  "abc", // both "abc" and "bcd" are length 3, "abc" comes first
+		},
+		{
+			name:  "no valid chain starts without single char",
+			words: []string{"ab", "abc", "abcd"},
+			want:  "", // none start with a single char that's a word
+		},
+		{
+			name:  "world example",
+			words: []string{"w", "wo", "wor", "worl", "world"},
+			want:  "world",
+		},
+	}
+	for _, tt := range tests {
+		t1.Run(tt.name, func(t1 *testing.T) {
+			trie := NewTrie()
+			trie.InsertMany(tt.words)
+			if got := trie.FindLongestOneCharAtATime(); got != tt.want {
+				t1.Errorf("FindLongestOneCharAtATime() = %v, want %v", got, tt.want)
 			}
 		})
 	}

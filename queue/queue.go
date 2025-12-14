@@ -7,7 +7,7 @@ type Queue[T any] struct {
 func New[T any](items ...T) *Queue[T] {
 	queue := make([]T, 0)
 	for _, item := range items {
-		queue = append(items, item)
+		queue = append(queue, item)
 	}
 	return &Queue[T]{queue: queue}
 }

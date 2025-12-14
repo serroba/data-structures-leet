@@ -33,12 +33,15 @@ func (n *node) countWords() int {
 		return 0
 	}
 	count := 0
-	current := n
-	if current.isEnd {
-		count++
-	}
-	for _, ch := range current.children {
-		count += ch.countWords()
+	q := queue.New(n)
+	for !q.Empty() {
+		i := q.Dequeue()
+		if i.isEnd {
+			count++
+		}
+		for _, child := range i.children {
+			q.Enqueue(child)
+		}
 	}
 	return count
 }
@@ -96,8 +99,83 @@ func (t *Trie) SearchWord(word string) bool {
 	return current.isEnd
 }
 
-func (t *Trie) SearchFirstWith(pattern string) []string {
-	return []string{}
+// SearchWith finds all words matching a pattern with '?' as single-character wildcard.
+// It tracks multiple positions in the trie simultaneously, advancing through the pattern.
+//
+// Example: pattern "?at" on trie with ["cat", "bat", "rat", "car"]
+//
+//	Trie structure:
+//	        root
+//	       / | \
+//	      c  b  r
+//	     /|  |   \
+//	    a o  a    a
+//	   /| |  |     \
+//	  t r t  t      t
+//
+//	Step 1: patternChar = '?'
+//	  frontier: [root]
+//	  '?' matches any char → expand to ALL children
+//	  nextFrontier: [(c,"c"), (b,"b"), (r,"r")]
+//
+//	Step 2: patternChar = 'a'
+//	  frontier: [(c,"c"), (b,"b"), (r,"r")]
+//	  'a' is literal → only keep nodes with 'a' child
+//	  nextFrontier: [(ca,"ca"), (ba,"ba"), (ra,"ra")]
+//
+//	Step 3: patternChar = 't'
+//	  frontier: [(ca,"ca"), (ba,"ba"), (ra,"ra")]
+//	  't' is literal → only keep nodes with 't' child
+//	  nextFrontier: [(cat,"cat"), (bat,"bat"), (rat,"rat")]
+//
+//	Collect: all three nodes have isEnd=true
+//	Result: ["cat", "bat", "rat"]
+func (t *Trie) SearchWith(pattern string) []string {
+	if t.Root == nil || t.Root.children == nil {
+		return nil
+	}
+	type candidate struct {
+		node      *node
+		wordSoFar string
+	}
+
+	// frontier holds all current positions we're tracking in parallel
+	frontier := []candidate{{node: t.Root}}
+
+	for _, patternChar := range pattern {
+		var nextFrontier []candidate
+
+		for _, current := range frontier {
+			if patternChar == '?' {
+				// wildcard: branch out to ALL children
+				for childChar, childNode := range current.node.children {
+					nextFrontier = append(nextFrontier, candidate{
+						node:      childNode,
+						wordSoFar: current.wordSoFar + string(childChar),
+					})
+				}
+			} else {
+				// literal: follow only the matching child (if exists)
+				if childNode, ok := current.node.children[patternChar]; ok {
+					nextFrontier = append(nextFrontier, candidate{
+						node:      childNode,
+						wordSoFar: current.wordSoFar + string(patternChar),
+					})
+				}
+			}
+		}
+
+		frontier = nextFrontier
+	}
+
+	// collect results: only nodes that mark end of a complete word
+	var matches []string
+	for _, current := range frontier {
+		if current.node.isEnd {
+			matches = append(matches, current.wordSoFar)
+		}
+	}
+	return matches
 }
 
 func (t *Trie) FindFirstWith(target rune) string {
@@ -168,21 +246,6 @@ func (t *Trie) FindAllWords() []string {
 
 	}
 	return words
-}
-
-func findEarliestFullWord(node *node, prefix string) string {
-	if node.isEnd {
-		return prefix
-	}
-
-	for _, ch := range node.sortedChildrenKeys() {
-		child := node.children[ch]
-		result := findEarliestFullWord(child, prefix+string(ch))
-		if result != "" {
-			return result
-		}
-	}
-	return ""
 }
 
 func (t *Trie) CountWordsWith(prefix string) int {
@@ -357,4 +420,21 @@ func (t *Trie) HasWordOf(length int) bool {
 		}
 	}
 	return false
+}
+
+func (t *Trie) FindLongestOneCharAtATime() string {
+	if t == nil || t.Root == nil || t.Root.children == nil {
+		return ""
+	}
+	output := ""
+	s := stack.New(t.Root)
+	for !s.Empty() {
+		i, _ := s.Pop()
+		if i.isEnd {
+			for _, child := range i.children {
+				s.Push(child)
+			}
+		}
+	}
+	return output
 }
