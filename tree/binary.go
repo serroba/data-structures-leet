@@ -82,3 +82,14 @@ func (t *Tree[T]) FindAllDFS() []T {
 	}
 	return output
 }
+
+func HasPathSum(t *Node[int], target, sumSoFar int) bool {
+	if t == nil {
+		return false
+	}
+	sumSoFar += t.val
+	if t.left == nil && t.right == nil {
+		return target-sumSoFar == 0
+	}
+	return HasPathSum(t.left, target, sumSoFar) || HasPathSum(t.right, target, sumSoFar)
+}

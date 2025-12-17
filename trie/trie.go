@@ -13,6 +13,8 @@ import (
 type node struct {
 	isEnd    bool
 	children map[rune]*node
+	parent   *node
+	val      rune
 }
 
 func (n *node) hasChildren() bool {
@@ -58,11 +60,20 @@ func NewTrie() *Trie {
 
 func (t *Trie) Insert(word string) *Trie {
 	current := t.Root
+	var parent *node
 	for _, ch := range word {
 		if _, ok := current.children[ch]; !ok {
-			current.children[ch] = &node{children: make(map[rune]*node)}
+			current.children[ch] = &node{children: make(map[rune]*node), val: ch}
+
+			if parent != nil {
+				current.children[ch].parent = parent
+			}
 		}
 		current = current.children[ch]
+		if current.val != 0 {
+			current.parent = parent
+		}
+		parent = current
 	}
 	current.isEnd = true
 	return t
@@ -177,6 +188,90 @@ func (t *Trie) SearchWith(pattern string) []string {
 	}
 	return matches
 }
+
+func (t *Trie) FindFirstWordMatching(pattern string) string {
+	if t.Root == nil {
+		return ""
+	}
+	if pattern == "" {
+		return ""
+	}
+	current := t.Root
+	for _, ch := range pattern {
+		if _, ok := current.children[ch]; !ok && ch != '?' {
+			return ""
+		}
+		if ch == '?' {
+			for key, _ := range current.children {
+				current = current.children[key]
+				break
+			}
+		} else {
+			current = current.children[ch]
+		}
+	}
+	if !current.isEnd {
+		return ""
+	}
+	return GetWordSoFar(current)
+}
+
+func GetWordSoFar(node *node) string {
+	var wordSoFar = string(node.val)
+	for node.parent != nil {
+		node = node.parent
+		wordSoFar = string(node.val) + wordSoFar
+	}
+	return wordSoFar
+}
+
+func FindAllMatching(n *node, pattern string) []string {
+	current := n
+	var matches []string
+	if pattern == "" && n.isEnd {
+		return []string{GetWordSoFar(n)}
+	}
+	if n.isEnd {
+		return nil
+	}
+
+	var matchingChildren map[rune]*node
+	ch := []rune(pattern)[0]
+	if _, ok := current.children[ch]; !ok && ch != '?' {
+		return nil
+	}
+	if ch == '?' {
+		matchingChildren = current.children
+	} else {
+		matchingChildren = map[rune]*node{ch: current.children[ch]}
+	}
+
+	for _, child := range matchingChildren {
+		for _, match := range FindAllMatching(child, pattern[1:]) {
+			matches = append(matches, match)
+		}
+	}
+	return matches
+}
+
+//var first rune
+//for _,c := range str {
+//first = c
+//break
+//}
+
+//
+//func main() {
+//	s := "世界 Hello"
+//	r, size := utf8.DecodeRuneInString(s)
+//
+//	fmt.Printf("First rune: %c (Unicode point: %#U, size in bytes: %d)\n", r, r, size)
+//
+//	// Example with ASCII string
+//	s2 := "Hello"
+//	r2, size2 := utf8.DecodeRuneInString(s2)
+//	fmt.Printf("First rune: %c (Unicode point: %#U, size in bytes: %d)\n", r2, r2, size2)
+//}
 
 func (t *Trie) FindFirstWith(target rune) string {
 	if t.Root == nil {

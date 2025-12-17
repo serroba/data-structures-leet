@@ -551,3 +551,54 @@ func TestTrie_FindLongestOneCharAtATime(t1 *testing.T) {
 		})
 	}
 }
+
+func TestTrie_FindFirstWordMatching(t1 *testing.T) {
+	type fields struct {
+		words []string
+	}
+	type args struct {
+		pattern string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   string
+	}{
+		//a?c abc, acc
+		{name: "test 1", fields: fields{words: []string{"abc", "acc"}}, args: args{pattern: "a?c"}, want: "abc"},
+		{name: "test false", fields: fields{words: []string{"abc", "acc"}}, args: args{pattern: "n?c"}, want: ""},
+	}
+	for _, tt := range tests {
+		t1.Run(tt.name, func(t1 *testing.T) {
+			t := NewTrie()
+			t.InsertMany(tt.fields.words)
+			if got := t.FindFirstWordMatching(tt.args.pattern); got != tt.want {
+				t1.Errorf("FindFirstWordMatching() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFindAllMatching(t *testing.T) {
+	type args struct {
+		words   []string
+		pattern string
+	}
+	tests := []struct {
+		name string
+		args args
+		want []string
+	}{
+		{name: "test 1", args: args{words: []string{"abc", "acc"}, pattern: "a?c"}, want: []string{"abc", "acc"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			n := NewTrie()
+			n.InsertMany(tt.args.words)
+			if got := FindAllMatching(n.Root, tt.args.pattern); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("FindAllMatching() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

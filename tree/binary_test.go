@@ -208,3 +208,146 @@ func TestFindAllDFS(t *testing.T) {
 		})
 	}
 }
+
+func TestHasPathSum(t *testing.T) {
+	type args struct {
+		t        *Node[int]
+		target   int
+		sumSoFar int
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			name: "empty tree",
+			args: args{
+				t:        nil,
+				target:   0,
+				sumSoFar: 0,
+			},
+			want: false,
+		},
+		{
+			name: "single node - matches",
+			args: args{
+				t:        &Node[int]{val: 5},
+				target:   5,
+				sumSoFar: 0,
+			},
+			want: true,
+		},
+		{
+			name: "single node - does not match",
+			args: args{
+				t:        &Node[int]{val: 5},
+				target:   6,
+				sumSoFar: 0,
+			},
+			want: false,
+		},
+		{
+			name: "two level - left leaf matches",
+			args: args{
+				t: &Node[int]{
+					val:   5,
+					left:  &Node[int]{val: 4},
+					right: &Node[int]{val: 8},
+				},
+				target:   9, // 5 -> 4
+				sumSoFar: 0,
+			},
+			want: true,
+		},
+		{
+			name: "two level - internal sum matches but not a leaf path",
+			args: args{
+				t: &Node[int]{
+					val:   5,
+					left:  &Node[int]{val: 4, left: &Node[int]{val: 1}},
+					right: &Node[int]{val: 8},
+				},
+				target:   9, // 5 -> 4 sums to 9, but 4 isn't a leaf
+				sumSoFar: 0,
+			},
+			want: false,
+		},
+		{
+			name: "multi-level - classic example matches (5-4-11-2)",
+			args: args{
+				t: &Node[int]{
+					val: 5,
+					left: &Node[int]{
+						val: 4,
+						left: &Node[int]{
+							val:   11,
+							left:  &Node[int]{val: 7},
+							right: &Node[int]{val: 2},
+						},
+					},
+					right: &Node[int]{
+						val:   8,
+						left:  &Node[int]{val: 13},
+						right: &Node[int]{val: 4, right: &Node[int]{val: 1}},
+					},
+				},
+				target:   22,
+				sumSoFar: 0,
+			},
+			want: true,
+		},
+		{
+			name: "multi-level - no matching path",
+			args: args{
+				t: &Node[int]{
+					val: 1,
+					left: &Node[int]{
+						val:  2,
+						left: &Node[int]{val: 3},
+					},
+					right: &Node[int]{
+						val:   4,
+						right: &Node[int]{val: 5},
+					},
+				},
+				target:   100,
+				sumSoFar: 0,
+			},
+			want: false,
+		},
+		{
+			name: "handles negative values",
+			args: args{
+				t: &Node[int]{
+					val: -2,
+					right: &Node[int]{
+						val: -3,
+					},
+				},
+				target:   -5, // -2 -> -3
+				sumSoFar: 0,
+			},
+			want: true,
+		},
+		{
+			name: "non-zero sumSoFar (pre-accumulated) still works",
+			args: args{
+				t: &Node[int]{
+					val:  5,
+					left: &Node[int]{val: 4},
+				},
+				target:   12, // sumSoFar=3 + 5 + 4 = 12
+				sumSoFar: 3,
+			},
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := HasPathSum(tt.args.t, tt.args.target, tt.args.sumSoFar); got != tt.want {
+				t.Errorf("HasPathSum() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
