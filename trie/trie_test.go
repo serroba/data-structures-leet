@@ -2,6 +2,7 @@ package trie
 
 import (
 	"reflect"
+	"slices"
 	"sort"
 	"testing"
 )
@@ -598,6 +599,40 @@ func TestFindAllMatching(t *testing.T) {
 			n.InsertMany(tt.args.words)
 			if got := FindAllMatching(n.Root, tt.args.pattern); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("FindAllMatching() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFindStarMatching(t *testing.T) {
+	type args struct {
+		words   []string
+		pattern string
+	}
+	tests := []struct {
+		name string
+		args args
+		want []string
+	}{
+		{name: "test 1", args: args{words: []string{"turkey", "acc"}, pattern: "t*y"}, want: []string{"turkey"}},
+		{name: "test 2", args: args{words: []string{"turkey", "turkey2"}, pattern: "*y"}, want: []string{"turkey"}},
+		{name: "test 3", args: args{words: []string{"abc", "acc"}, pattern: "a?c"}, want: []string{"abc", "acc"}},
+		{name: "test 4", args: args{words: []string{"abc", "accc"}, pattern: "a?c"}, want: []string{"abc"}},
+		{name: "test 5", args: args{words: []string{"turkey", "acc"}, pattern: "t*k?y"}, want: []string{"turkey"}},
+		{name: "test 6", args: args{words: []string{"turkey", "acc"}, pattern: "*"}, want: []string{"acc", "turkey"}},
+		{name: "test 7", args: args{words: []string{"turkey", "turk"}, pattern: "*"}, want: []string{"turk", "turkey"}},
+		{name: "test 8", args: args{words: []string{"turkey", "turk"}, pattern: "t****y"}, want: []string{"turkey"}},
+		{name: "test 9", args: args{words: []string{"turkey", "turk"}, pattern: "*y"}, want: []string{"turkey"}},
+		{name: "test 9", args: args{words: []string{"turkey"}, pattern: "**"}, want: []string{"turkey"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			n := NewTrie()
+			n.InsertMany(tt.args.words)
+			got := FindStarMatching(n.Root, tt.args.pattern)
+			slices.Sort(got)
+			if !slices.Equal(got, tt.want) {
+				t.Errorf("FindStarMatching() = %v, want %v", got, tt.want)
 			}
 		})
 	}

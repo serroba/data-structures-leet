@@ -32,6 +32,17 @@ type ListNode struct {
 	Next *ListNode
 }
 
+func NewListNode(numbers ...int) *ListNode {
+	l := &ListNode{}
+	for i, number := range numbers {
+		l.Val = number
+		if i < len(numbers)-1 {
+			l.Next = &ListNode{}
+		}
+	}
+	return l
+}
+
 // func NewListFromNumber(number int) List {
 //	list := List{}
 //	for number > 0 {
@@ -56,6 +67,18 @@ func (l *ListNode) String() string {
 }
 
 func (l *ListNode) Append(number int) {
+	current := l
+	for current.Next != nil {
+		current = current.Next
+	}
+	current.Next = &ListNode{Val: number}
+}
+
+func (l *ListNode) AppendMany(numbers ...int) *ListNode {
+	for _, number := range numbers {
+		l.Append(number)
+	}
+	return l
 }
 
 func AddTwoNumbers(l1 *ListNode, l2 *ListNode) *ListNode {

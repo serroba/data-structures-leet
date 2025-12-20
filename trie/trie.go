@@ -225,6 +225,8 @@ func GetWordSoFar(node *node) string {
 	return wordSoFar
 }
 
+// patern c*t
+// pattern t*y  word = turkey
 func FindAllMatching(n *node, pattern string) []string {
 	current := n
 	var matches []string
@@ -241,8 +243,10 @@ func FindAllMatching(n *node, pattern string) []string {
 		return nil
 	}
 	if ch == '?' {
+		// Find all words under all children
 		matchingChildren = current.children
 	} else {
+		// Find all words under a single matching child
 		matchingChildren = map[rune]*node{ch: current.children[ch]}
 	}
 
@@ -253,6 +257,82 @@ func FindAllMatching(n *node, pattern string) []string {
 	}
 	return matches
 }
+
+// pattern t*y  word = turkey
+func FindStarMatching(n *node, pattern string) []string {
+	current := n
+
+	if pattern == "" {
+		if current.isEnd {
+			// Pattern fully consumed. This is a match!
+			return []string{GetWordSoFar(n)}
+		} else {
+			return nil
+		}
+	}
+
+	if current.isEnd && current.children == nil {
+		// we have found a terminal node, leaf
+		return nil
+	}
+
+	var matchingChildren map[rune]*node
+	ch := []rune(pattern)[0]
+	if _, ok := current.children[ch]; !ok && ch != '*' && ch != '?' {
+		return nil
+	}
+	if ch == '*' || ch == '?' {
+		// Find all words under all children
+		matchingChildren = current.children
+	} else {
+		// Find all words under a single matching child
+		matchingChildren = map[rune]*node{ch: current.children[ch]}
+	}
+
+	var matches []string
+	for _, child := range matchingChildren {
+		if ch == '*' {
+			for _, match := range FindStarMatching(child, pattern) {
+				matches = append(matches, match)
+			}
+		}
+		for _, match := range FindStarMatching(child, pattern[1:]) {
+			matches = append(matches, match)
+		}
+	}
+	return matches
+}
+
+// *y
+
+//
+//func FindAllMatchingStack(n *node, pattern string) []string {
+//	var results []string
+//	type item struct {
+//		n          *node
+//		patternIdx int
+//	}
+//	s := stack.New(item{n, 0})
+//	for !s.Empty() {
+//		i, _ := s.Pop()
+//		if i.patternIdx == len(pattern) {
+//			if i.n.isEnd {
+//				results = append(results, GetWordSoFar(n))
+//			}
+//			continue
+//		}
+//		ch := pattern[i.patternIdx]
+//	}
+//	var matches []string
+//	if pattern == "" && n.isEnd {
+//		return []string{GetWordSoFar(n)}
+//	}
+//	if n.isEnd {
+//		return nil
+//	}
+//
+//	return matches
+//}
 
 //var first rune
 //for _,c := range str {
