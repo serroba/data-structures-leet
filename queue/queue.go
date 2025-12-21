@@ -17,9 +17,9 @@ func (q *Queue[T]) Enqueue(item T) {
 }
 
 func (q *Queue[T]) Dequeue() T {
-	top := q.queue[0]
+	head := q.queue[0]
 	q.queue = q.queue[1:]
-	return top
+	return head
 }
 
 func (q *Queue[T]) Len() int {

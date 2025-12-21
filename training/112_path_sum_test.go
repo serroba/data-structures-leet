@@ -73,6 +73,21 @@ func Test_hasPathSum(t *testing.T) {
 			},
 			want: false,
 		},
+		// [1,2], targetSum=0 → false (single child case)
+		//   1
+		//  /
+		// 2
+		{
+			name: "example 4 - single child",
+			args: args{
+				root: &TreeNode{
+					Val:  1,
+					Left: &TreeNode{Val: 2},
+				},
+				targetSum: 0,
+			},
+			want: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

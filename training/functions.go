@@ -136,7 +136,7 @@ func LengthOfLongestSubstring(s string) int {
 	return maxLen
 }
 
-func IsPalindrome(x int) bool {
+func IsPalindromeNumber(x int) bool {
 	if x < 0 {
 		return false
 	}
