@@ -48,6 +48,19 @@ func (n *node) countWords() int {
 	return count
 }
 
+func (n *node) getWordSoFar() string {
+	if n == nil {
+		return ""
+	}
+	current := n
+	wordSoFar := ""
+	for current != nil {
+		wordSoFar = string(current.val) + wordSoFar
+		current = current.parent
+	}
+	return wordSoFar
+}
+
 type Trie struct {
 	Root *node
 }
@@ -213,7 +226,7 @@ func (t *Trie) FindFirstWordMatching(pattern string) string {
 	if !current.isEnd {
 		return ""
 	}
-	return GetWordSoFar(current)
+	return current.getWordSoFar()
 }
 
 func GetWordSoFar(node *node) string {
@@ -225,45 +238,43 @@ func GetWordSoFar(node *node) string {
 	return wordSoFar
 }
 
-// patern c*t
-// pattern t*y  word = turkey
-func FindAllMatching(n *node, pattern string) []string {
-	current := n
+// patern c?t
+// pattern t?y  word = turkey
+func (n *node) FindAllMatching(pattern string) []string {
 	var matches []string
-	if pattern == "" && n.isEnd {
-		return []string{GetWordSoFar(n)}
+	if pattern == "" {
+		if n.isEnd {
+			return []string{n.getWordSoFar()}
+		}
+		return nil
 	}
-	if n.isEnd {
+	if !n.hasChildren() {
 		return nil
 	}
 
 	var matchingChildren map[rune]*node
 	ch := []rune(pattern)[0]
-	if _, ok := current.children[ch]; !ok && ch != '?' {
+	if _, ok := n.children[ch]; !ok && ch != '?' {
 		return nil
 	}
 	if ch == '?' {
 		// Find all words under all children
-		matchingChildren = current.children
+		matchingChildren = n.children
 	} else {
 		// Find all words under a single matching child
-		matchingChildren = map[rune]*node{ch: current.children[ch]}
+		matchingChildren = map[rune]*node{ch: n.children[ch]}
 	}
 
 	for _, child := range matchingChildren {
-		for _, match := range FindAllMatching(child, pattern[1:]) {
-			matches = append(matches, match)
-		}
+		matches = append(matches, child.FindAllMatching(pattern[1:])...)
 	}
 	return matches
 }
 
 // pattern t*y  word = turkey
-func FindStarMatching(n *node, pattern string) []string {
-	current := n
-
+func (n *node) FindStarMatching(pattern string) []string {
 	if pattern == "" {
-		if current.isEnd {
+		if n.isEnd {
 			// Pattern fully consumed. This is a match!
 			return []string{GetWordSoFar(n)}
 		} else {
@@ -271,32 +282,32 @@ func FindStarMatching(n *node, pattern string) []string {
 		}
 	}
 
-	if current.isEnd && current.children == nil {
+	if !n.hasChildren() {
 		// we have found a terminal node, leaf
 		return nil
 	}
 
 	var matchingChildren map[rune]*node
 	ch := []rune(pattern)[0]
-	if _, ok := current.children[ch]; !ok && ch != '*' && ch != '?' {
+	if _, ok := n.children[ch]; !ok && ch != '*' && ch != '?' {
 		return nil
 	}
 	if ch == '*' || ch == '?' {
 		// Find all words under all children
-		matchingChildren = current.children
+		matchingChildren = n.children
 	} else {
 		// Find all words under a single matching child
-		matchingChildren = map[rune]*node{ch: current.children[ch]}
+		matchingChildren = map[rune]*node{ch: n.children[ch]}
 	}
 
 	var matches []string
 	for _, child := range matchingChildren {
 		if ch == '*' {
-			for _, match := range FindStarMatching(child, pattern) {
+			for _, match := range child.FindStarMatching(pattern) {
 				matches = append(matches, match)
 			}
 		}
-		for _, match := range FindStarMatching(child, pattern[1:]) {
+		for _, match := range child.FindStarMatching(pattern[1:]) {
 			matches = append(matches, match)
 		}
 	}
