@@ -3,14 +3,17 @@ package leet
 // [73, 74, 75, 71, 69, 72, 76, 73]
 func dailyTemperatures(temperatures []int) []int {
 	res := make([]int, len(temperatures))
+
 	s := stackInt{}
-	for i := 0; i < len(temperatures); i++ {
+	for i := range temperatures {
 		for !s.IsEmpty() && temperatures[i] > temperatures[s.Peek()] {
 			j := s.Pop()
 			res[j] = i - j
 		}
+
 		s.Push(i)
 	}
+
 	return res
 }
 
@@ -27,6 +30,7 @@ func (s *stackInt) IsEmpty() bool {
 func (s *stackInt) Pop() int {
 	top := (*s)[len(*s)-1]
 	*s = (*s)[:len(*s)-1]
+
 	return top
 }
 

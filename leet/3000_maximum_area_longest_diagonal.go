@@ -12,9 +12,11 @@ func AreaOfMaxDiagonal(dimensions [][]int) int {
 			maxDiagonal = diagonal
 			ma = dimensions[i][0] * dimensions[i][1]
 		}
+
 		if maxDiagonal == diagonal && ma < dimensions[i][0]*dimensions[i][1] {
 			ma = dimensions[i][0] * dimensions[i][1]
 		}
 	}
+
 	return ma
 }

@@ -9,6 +9,7 @@ func New[T any](items ...T) Stack[T] {
 	for _, item := range items {
 		stack.Push(item)
 	}
+
 	return stack
 }
 
@@ -19,18 +20,23 @@ func (s *Stack[T]) Push(item T) {
 func (s *Stack[T]) Pop() (T, bool) {
 	if len(s.stack) == 0 {
 		var zero T
+
 		return zero, false
 	}
+
 	pop := s.stack[len(s.stack)-1]
 	s.stack = s.stack[:len(s.stack)-1]
+
 	return pop, true
 }
 
 func (s *Stack[T]) Peek() (T, bool) {
 	if s == nil {
 		var zero T
+
 		return zero, false
 	}
+
 	return s.stack[len(s.stack)-1], true
 }
 

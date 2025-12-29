@@ -31,5 +31,6 @@ func checkHeight(node *TreeNode) int {
 	if leftHeight > rightHeight {
 		return leftHeight + 1
 	}
+
 	return rightHeight + 1
 }

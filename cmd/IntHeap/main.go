@@ -23,6 +23,7 @@ func (h *IntHeap) Pop() any {
 	n := len(old)
 	x := old[n-1]
 	*h = old[0 : n-1]
+
 	return x
 }
 
@@ -33,6 +34,7 @@ func main() {
 	heap.Init(h)
 	heap.Push(h, 3)
 	fmt.Printf("minimum: %d\n", (*h)[0])
+
 	for h.Len() > 0 {
 		fmt.Printf("%d ", heap.Pop(h))
 	}

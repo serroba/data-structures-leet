@@ -37,9 +37,11 @@ func Find[T cmp.Ordered](node *Node[T], val T) bool {
 	if node.val == val {
 		return true
 	}
+
 	if val < node.val {
 		return Find(node.left, val)
 	}
+
 	return Find(node.right, val)
 }
 
@@ -48,14 +50,18 @@ func (t *Tree[T]) FindAllBFS() []T {
 	if t.root == nil {
 		return output
 	}
+
 	q := queue.New[*Node[T]]()
 	q.Enqueue(t.root)
+
 	for !q.Empty() {
 		item := q.Dequeue()
+
 		output = append(output, item.val)
 		if item.left != nil {
 			q.Enqueue(item.left)
 		}
+
 		if item.right != nil {
 			q.Enqueue(item.right)
 		}
@@ -69,17 +75,21 @@ func (t *Tree[T]) FindAllDFS() []T {
 	if t.root == nil {
 		return output
 	}
+
 	s := stack.New(t.root)
 	for !s.Empty() {
 		item, _ := s.Pop()
+
 		output = append(output, item.val)
 		if item.right != nil {
 			s.Push(item.right)
 		}
+
 		if item.left != nil {
 			s.Push(item.left)
 		}
 	}
+
 	return output
 }
 
@@ -87,9 +97,11 @@ func HasPathSum(t *Node[int], target, sumSoFar int) bool {
 	if t == nil {
 		return false
 	}
+
 	sumSoFar += t.val
 	if t.left == nil && t.right == nil {
 		return target-sumSoFar == 0
 	}
+
 	return HasPathSum(t.left, target, sumSoFar) || HasPathSum(t.right, target, sumSoFar)
 }

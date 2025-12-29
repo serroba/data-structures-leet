@@ -12,7 +12,9 @@ func MakeFancyString(s string) string {
 		if s[i-2] == s[i-1] && s[i-1] == s[i] {
 			continue
 		}
+
 		output = append(output, s[i])
 	}
+
 	return string(output)
 }

@@ -6,9 +6,8 @@ type Queue[T any] struct {
 
 func New[T any](items ...T) *Queue[T] {
 	queue := make([]T, 0)
-	for _, item := range items {
-		queue = append(queue, item)
-	}
+	queue = append(queue, items...)
+
 	return &Queue[T]{queue: queue}
 }
 
@@ -19,6 +18,7 @@ func (q *Queue[T]) Enqueue(item T) {
 func (q *Queue[T]) Dequeue() T {
 	head := q.queue[0]
 	q.queue = q.queue[1:]
+
 	return head
 }
 

@@ -7,13 +7,16 @@ type TrieNode struct {
 
 func insert(root *TrieNode, w string) {
 	cur := root
-	for i := 0; i < len(w); i++ {
+
+	for i := range len(w) {
 		idx := w[i] - 'a'
 		if cur.next[idx] == nil {
 			cur.next[idx] = &TrieNode{}
 		}
+
 		cur = cur.next[idx]
 	}
+
 	cur.word = w
 }
 
@@ -31,6 +34,7 @@ func findWords(board [][]byte, words []string) []string {
 	res := make([]string, 0)
 
 	var dfs func(r, c int, node *TrieNode)
+
 	dfs = func(r, c int, node *TrieNode) {
 		ch := board[r][c]
 		if ch == '#' {
@@ -51,20 +55,24 @@ func findWords(board [][]byte, words []string) []string {
 		if r > 0 {
 			dfs(r-1, c, child)
 		}
+
 		if r+1 < rows {
 			dfs(r+1, c, child)
 		}
+
 		if c > 0 {
 			dfs(r, c-1, child)
 		}
+
 		if c+1 < cols {
 			dfs(r, c+1, child)
 		}
+
 		board[r][c] = ch
 	}
 
-	for r := 0; r < rows; r++ {
-		for c := 0; c < cols; c++ {
+	for r := range rows {
+		for c := range cols {
 			dfs(r, c, root)
 		}
 	}

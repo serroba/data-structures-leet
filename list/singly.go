@@ -16,12 +16,14 @@ func (l *ListNode) String() string {
 		output = append(output, strconv.Itoa(l.Val))
 		l = l.Next
 	}
+
 	return strings.Join(output, "->")
 }
 
 func MergeTwoLists(list1 *ListNode, list2 *ListNode) *ListNode {
 	node := &ListNode{}
 	dummy := node
+
 	for list1 != nil && list2 != nil {
 		if list1.Val < list2.Val {
 			node.Next = list1
@@ -30,6 +32,7 @@ func MergeTwoLists(list1 *ListNode, list2 *ListNode) *ListNode {
 			node.Next = list2
 			list2 = list2.Next
 		}
+
 		node = node.Next
 	}
 

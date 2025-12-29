@@ -5,16 +5,20 @@ func isPalindromeString(s string) bool {
 		for i < len(s) && !isAlphaNumeric(s[i]) {
 			i++
 		}
+
 		for j >= 0 && !isAlphaNumeric(s[j]) {
 			j--
 		}
+
 		if i > j {
 			return true
 		}
+
 		if toLower(s[i]) != toLower(s[j]) {
 			return false
 		}
 	}
+
 	return true
 }
 
@@ -22,6 +26,7 @@ func toLower(char byte) byte {
 	if char >= 'A' && char <= 'Z' {
 		return char + 'a' - 'A'
 	}
+
 	return char
 }
 

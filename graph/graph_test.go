@@ -1,6 +1,8 @@
 package graph
 
 import (
+	"math"
+	"reflect"
 	"testing"
 )
 
@@ -216,6 +218,167 @@ func TestUndirectedGraph_IsATree(t *testing.T) {
 			g := NewUndirectedGraph(tt.fields.n, tt.fields.edges)
 			if got := g.IsATree(); got != tt.want {
 				t.Errorf("IsATree() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestWeightedGraph_Dijkstra(t *testing.T) {
+	tests := []struct {
+		name   string
+		n      int
+		edges  []WeightedEdge
+		source int
+		want   []int
+	}{
+		{
+			name:   "single node",
+			n:      1,
+			edges:  nil,
+			source: 0,
+			want:   []int{0},
+		},
+		{
+			name: "simple path",
+			n:    3,
+			edges: []WeightedEdge{
+				{0, 1, 2},
+				{1, 2, 3},
+			},
+			source: 0,
+			want:   []int{0, 2, 5},
+		},
+		{
+			name: "choose shorter path",
+			n:    4,
+			edges: []WeightedEdge{
+				{0, 1, 1},
+				{1, 3, 1},
+				{0, 2, 10},
+				{2, 3, 1},
+			},
+			source: 0,
+			want:   []int{0, 1, 3, 2}, // 0->2 via 0->1->3->2 is 3, shorter than direct 10
+		},
+		{
+			name: "disconnected node",
+			n:    4,
+			edges: []WeightedEdge{
+				{0, 1, 5},
+				{1, 2, 3},
+			},
+			source: 0,
+			want:   []int{0, 5, 8, math.MaxInt},
+		},
+		{
+			name: "classic example graph",
+			n:    5,
+			edges: []WeightedEdge{
+				{0, 1, 4},
+				{0, 2, 1},
+				{2, 1, 2},
+				{1, 3, 1},
+				{2, 3, 5},
+				{3, 4, 3},
+			},
+			source: 0,
+			want:   []int{0, 3, 1, 4, 7}, // 0->1 via 0->2->1 = 3, 0->3 via 0->2->1->3 = 4
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := NewWeightedGraph(tt.n, tt.edges)
+			got := g.Dijkstra(tt.source)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Dijkstra() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestWeightedGraph_DijkstraPath(t *testing.T) {
+	tests := []struct {
+		name        string
+		n           int
+		edges       []WeightedEdge
+		source      int
+		destination int
+		wantPath    []int
+		wantDist    int
+	}{
+		{
+			name:        "same source and destination",
+			n:           3,
+			edges:       []WeightedEdge{{0, 1, 5}, {1, 2, 3}},
+			source:      0,
+			destination: 0,
+			wantPath:    []int{0},
+			wantDist:    0,
+		},
+		{
+			name:        "simple path",
+			n:           3,
+			edges:       []WeightedEdge{{0, 1, 2}, {1, 2, 3}},
+			source:      0,
+			destination: 2,
+			wantPath:    []int{0, 1, 2},
+			wantDist:    5,
+		},
+		{
+			name: "path with shortcut",
+			n:    4,
+			edges: []WeightedEdge{
+				{0, 1, 1},
+				{1, 2, 1},
+				{2, 3, 1},
+				{0, 3, 10},
+			},
+			source:      0,
+			destination: 3,
+			wantPath:    []int{0, 1, 2, 3},
+			wantDist:    3,
+		},
+		{
+			name: "no path exists",
+			n:    4,
+			edges: []WeightedEdge{
+				{0, 1, 1},
+				{2, 3, 1},
+			},
+			source:      0,
+			destination: 3,
+			wantPath:    nil,
+			wantDist:    -1,
+		},
+		{
+			name: "complex graph find optimal path",
+			n:    6,
+			edges: []WeightedEdge{
+				{0, 1, 7},
+				{0, 2, 9},
+				{0, 5, 14},
+				{1, 2, 10},
+				{1, 3, 15},
+				{2, 3, 11},
+				{2, 5, 2},
+				{3, 4, 6},
+				{4, 5, 9},
+			},
+			source:      0,
+			destination: 4,
+			wantPath:    []int{0, 2, 5, 4},
+			wantDist:    20,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := NewWeightedGraph(tt.n, tt.edges)
+			gotPath, gotDist := g.DijkstraPath(tt.source, tt.destination)
+			if !reflect.DeepEqual(gotPath, tt.wantPath) {
+				t.Errorf("DijkstraPath() path = %v, want %v", gotPath, tt.wantPath)
+			}
+			if gotDist != tt.wantDist {
+				t.Errorf("DijkstraPath() dist = %v, want %v", gotDist, tt.wantDist)
 			}
 		})
 	}

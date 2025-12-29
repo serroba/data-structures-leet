@@ -7,9 +7,12 @@ func Maximum69Number(num int) int {
 	for i, digit := range numAsString {
 		if digit == '6' {
 			numAsString[i] = '9'
+
 			break
 		}
 	}
+
 	newNum, _ := strconv.Atoi(string(numAsString))
+
 	return newNum
 }

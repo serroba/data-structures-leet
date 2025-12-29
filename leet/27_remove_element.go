@@ -8,7 +8,9 @@ func removeElement(nums []int, val int) int {
 			nums = nums[1:]
 			left--
 		}
+
 		left++
 	}
+
 	return len(nums)
 }

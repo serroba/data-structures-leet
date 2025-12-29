@@ -40,6 +40,7 @@ func NewListNode(numbers ...int) *ListNode {
 			l.Next = &ListNode{}
 		}
 	}
+
 	return l
 }
 
@@ -71,6 +72,7 @@ func (l *ListNode) Append(number int) {
 	for current.Next != nil {
 		current = current.Next
 	}
+
 	current.Next = &ListNode{Val: number}
 }
 
@@ -78,6 +80,7 @@ func (l *ListNode) AppendMany(numbers ...int) *ListNode {
 	for _, number := range numbers {
 		l.Append(number)
 	}
+
 	return l
 }
 
@@ -199,13 +202,14 @@ func LongestCommonPrefix(strs []string) string {
 	}
 
 	var prefix []byte
-	//{name: "example 1", args: args{strs: []string{"flower", "flow", "flight"}}, want: "fl"},
+	// {name: "example 1", args: args{strs: []string{"flower", "flow", "flight"}}, want: "fl"},
 	for i, v := range strs[0] {
 		for j := 1; j < len(strs); j++ {
 			if i >= len(strs[j]) || strs[j][i] != strs[0][i] {
 				return string(prefix)
 			}
 		}
+
 		prefix = append(prefix, byte(v))
 	}
 
@@ -216,7 +220,9 @@ func IsValidParens(s string) bool {
 	if len(s)%2 != 0 {
 		return false
 	}
+
 	var stack []rune
+
 	for _, paren := range s {
 		if isLeftParen(paren) {
 			if len(stack) == 0 {
@@ -231,13 +237,16 @@ func IsValidParens(s string) bool {
 			if len(stack) == 0 {
 				return false
 			}
+
 			top := stack[len(stack)-1]
 			if !matchType(top, paren) {
 				return false
 			}
+
 			stack = stack[:len(stack)-1]
 		}
 	}
+
 	return len(stack) == 0
 }
 
@@ -261,5 +270,6 @@ func RemoveDuplicates(nums []int) int {
 			j++
 		}
 	}
+
 	return j
 }
