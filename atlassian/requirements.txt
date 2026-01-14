@@ -1,0 +1,9 @@
+
+item {
+    key: string
+    project: string
+    type: ENUM{bug, story, epic}
+}
+
+
+result(struct query, items...) items
